@@ -14,7 +14,7 @@ $(PROG): $(OBJ)
 	$(CC) -o $@ $^ $(LFLAGS)
 
 clean:
-	@rm -f *~ *.bak
+	@rm -f *~ *.bak *.o main
 
 purge: clean	
 	@rm -rf bin obj *.layout *.depend
