@@ -18,10 +18,9 @@ void wait_in_queue(FifoQT *F);
  * @param F Pointer to the FIFO queue structure to be initialized.
  */
 void init_fifoQ(FifoQT *F) {
-    // Inicializa os semáforos
-    sem_init(&F->mutex, 1, 1);          // Mutex inicializado para 1
-    sem_init(&F->wait_sem, 1, 0);       // Semáforo de espera inicializado para 0
-    F->waiting_count = 0;                // Contador de processos esperando
+    sem_init(&F->mutex, 1, 1); // Semaphore with process sharing
+    sem_init(&F->wait_sem, 1, 0);
+    F->waiting_count = 0;
 }
 
 /**
@@ -36,12 +35,12 @@ void init_fifoQ(FifoQT *F) {
 void espera(FifoQT *F) {
     lock_queue(F);
 
-    if(is_empty(F)) {             // Se não houver processos esperando
+    if(is_empty(F)) {
         unlock_queue(F);
         return;
     }
 
-    F->waiting_count++;                 // Incrementa o contador de processos esperando
+    F->waiting_count++;
     unlock_queue(F);
     wait_in_queue(F);
 }
@@ -64,7 +63,7 @@ void liberaPrimeiro(FifoQT *F) {
 }
 
 
-/* ----------------------------- Helper Functions ----------------------------- */ 
+/* Helper functions for the FIFO queue */ 
 
 int is_empty(FifoQT *F) {
     return F->waiting_count == 0;
