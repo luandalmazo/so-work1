@@ -1,6 +1,6 @@
 /* Created by: Luan Matheus Trindade Dalmazo [lmtd21] and Mateus de Oliveira Silva [mos20] */
 
-#include "barrier.h"
+#include "../include/barrier.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
