@@ -18,6 +18,11 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 # Build rules
 all: $(PROG)
 
+# Run target that accepts an argument
+run: $(PROG)
+	@read -p "Números de processos: " ARG; \
+	$(BIN_DIR)/$(PROG) $$ARG
+
 $(PROG): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CC) -o $(BIN_DIR)/$@ $^
@@ -33,4 +38,4 @@ clean:
 purge: clean
 	rm -rf bin obj *.layout *.depend *.o core a.out $(PROG)
 
-.PHONY: clean purge all
+.PHONY: clean purge all run
