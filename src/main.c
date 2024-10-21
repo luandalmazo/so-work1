@@ -121,12 +121,12 @@ void test_fifo(int num_processes) {
             int sleep_time = rand() % num_processes + 1;
 
             // Print info and sleep
-            printf("Filho: PID = %d, PPID = %d, dormindo por %d segundos\n", getpid(), getppid(), sleep_time);
+            printf("Filho: PID = %d, PPID = %d, nProc=%d dormindo por %d segundos\n", getpid(), getppid(), i+1, sleep_time);
             sleep(sleep_time);
 
             // Enqueue the process in the FIFO queue
             espera(fifo);
-            printf("Filho: PID = %d, saindo da FIFO\n", getpid());
+            printf("Filho: PID = %d, nProc=%d saindo da FIFO\n", getpid(), i+1);
 
 
             liberaPrimeiro(fifo); // Release the process from the FIFO queue
