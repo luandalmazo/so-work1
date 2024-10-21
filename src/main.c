@@ -49,13 +49,13 @@ void test_barrier(int num_processes){
             int sleep_time = rand() % num_processes;
              
             /* print info and sleep */
-            printf("Filho: PID = %d, PPID = %d, dormindo por %d segundos\n", getpid(), getppid(), sleep_time);
+            printf("Filho: PID = %d, PPID = %d, nProc=%d dormindo por %d segundos\n", getpid(), getppid(), i+1, sleep_time);
             sleep(sleep_time);
 
             /* synchronize processes */
             process_barrier(barr);
 
-            printf("Filho: PID = %d, saindo da barreira\n", getpid());
+            printf("Filho: PID = %d, PPID = %d, nProc=%d saindo da barreira\n", getpid(), getppid(), i+1);
             exit(0);
             }
         }
@@ -126,7 +126,7 @@ void test_fifo(int num_processes) {
 
             // Enqueue the process in the FIFO queue
             espera(fifo);
-            printf("Filho: PID = %d, nProc=%d saindo da FIFO\n", getpid(), i+1);
+            printf("Filho: PID = %d, PPID = %d, nProc=%d saindo da FIFO\n", getpid(), getppid(), i+1);
 
 
             liberaPrimeiro(fifo); // Release the process from the FIFO queue
