@@ -126,7 +126,7 @@ void test_fifo(int num_processes) {
 
             // Enqueue the process in the FIFO queue
             espera(fifo);
-            printf("Filho: PID = %d, saindo da barreira\n", getpid());
+            printf("Filho: PID = %d, saindo da FIFO\n", getpid());
 
 
             liberaPrimeiro(fifo); // Release the process from the FIFO queue
@@ -145,7 +145,7 @@ void test_fifo(int num_processes) {
 
     // Enqueue the parent in the FIFO queue
     espera(fifo);
-    printf("Pai: nProc = 0, PID = %d, saindo da barreira\n", getpid());
+    printf("Pai: nProc = 0, PID = %d, saindo da FIFO\n", getpid());
 
     liberaPrimeiro(fifo); // Release the parent from the FIFO queue
     // Waiting for the children
