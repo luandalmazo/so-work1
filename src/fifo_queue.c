@@ -1,3 +1,5 @@
+/* Created by: Luan Matheus Trindade Dalmazo [lmtd21] and Mateus de Oliveira Silva [mos20] */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
@@ -56,7 +58,7 @@ void espera(FifoQT *F) {
  */
 void liberaPrimeiro(FifoQT *F) {
     lock_queue(F);
-    if (is_empty(F)) {            
+    if (!is_empty(F)) {            
         remove_first_from_queue(F);
     }
     unlock_queue(F);                 

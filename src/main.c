@@ -121,12 +121,13 @@ void test_fifo(int num_processes) {
             int sleep_time = rand() % num_processes + 1;
 
             // Print info and sleep
-            printf("Child: PID = %d, sleeping for %d seconds\n", getpid(), sleep_time);
+            printf("Filho: PID = %d, PPID = %d, dormindo por %d segundos\n", getpid(), getppid(), sleep_time);
             sleep(sleep_time);
 
             // Enqueue the process in the FIFO queue
             espera(fifo);
-            printf("Child: PID = %d, exiting FIFO queue\n", getpid());
+            printf("Filho: PID = %d, saindo da barreira\n", getpid());
+
 
             liberaPrimeiro(fifo); // Release the process from the FIFO queue
             // Simulate doing some work after exiting the queue
@@ -139,12 +140,12 @@ void test_fifo(int num_processes) {
     // Parent process
     srand(time(NULL));
     int sleep_time = rand() % num_processes + 1;
-    printf("Parent: PID = %d, sleeping for %d seconds\n", getpid(), sleep_time);
+    printf("Pai: PID = %d, nProc = 0, dormindo por %d segundos\n", getpid(), sleep_time);
     sleep(sleep_time);
 
     // Enqueue the parent in the FIFO queue
     espera(fifo);
-    printf("Parent: PID = %d, exiting FIFO queue\n", getpid());
+    printf("Pai: nProc = 0, PID = %d, saindo da barreira\n", getpid());
 
     liberaPrimeiro(fifo); // Release the parent from the FIFO queue
     // Waiting for the children

@@ -1,3 +1,5 @@
+/* Created by: Luan Matheus Trindade Dalmazo [lmtd21] and Mateus de Oliveira Silva [mos20] */
+
 #ifndef FIFO_QUEUE_H
 #define FIFO_QUEUE_H
 
