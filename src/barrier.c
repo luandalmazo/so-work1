@@ -35,6 +35,7 @@ void init_barrier(barrier_t *barr, int n){
         perror("Error initializing barrier semaphore");
         exit(1);
     }
+
 }
 
 /**
@@ -56,6 +57,7 @@ void process_barrier(barrier_t *barr){
         for (int i = 0; i < barr->total_processes; i++){
             sem_post(&barr->barrier_semaphore);
         }
+        barr->waiting_processes = 0;
     }
 
     /* unlocking the mutex */
