@@ -10,6 +10,55 @@
 #include "../include/barrier.h"
 #include "../include/fifo_queue.h"
 
+char* get_current_time() {
+    // Static buffer to hold the formatted time string
+    static char time_str[9];
+    
+    // Get the current time
+    time_t now = time(NULL);
+    
+    // Format the time as a string with only hours, minutes, and seconds
+    strftime(time_str, sizeof(time_str), "%H:%M:%S", localtime(&now));
+
+    return time_str;
+}
+
+void fifo_recurse_usage(FifoQT *fifo, int uso) {
+    for (int uso = 0; uso < 3; uso++)
+    {
+
+        /* (A) simula executar algo no (prologo) */
+        /* random sleep between: 0, 1, 2, 3*/
+        int sleep_time = rand () % 10;
+        fprintf(stdout, "Processo: %d Prologo: %d de %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
+        sleep(sleep_time);
+        espera(fifo);
+
+        /* (B) simula usar o recurso com exclusividade */
+        /* random sleep between: 0, 1, 2, 3*/
+        sleep_time = 3;
+        fprintf(stdout, "Processo: %d USO: %d por %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
+        sleep(sleep_time);
+
+        liberaPrimeiro(fifo);
+
+        /* (C) simula executar algo (epilogo)  */
+        /* random sleep between: 0, 1, 2, 3*/
+        sleep_time = rand() % 4;
+        fprintf(stdout, "Processo: %d Epilogo: %d de %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
+        sleep(sleep_time);
+    }
+    printf("Processo %d terminando\n", getpid());
+}
+
+void sleep_random_time(int num_processes)
+{
+    srand(time(NULL) + getpid());
+    int sleep_time = rand() % num_processes;
+    printf("Processo: %d iniciando com sleep de %d segundos: %s\n", getpid(), sleep_time, get_current_time());
+    sleep(sleep_time);
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -34,6 +83,7 @@ int main(int argc, char *argv[])
 
     /* creating the shared memory for the barrier */
     shared_memory_id = shmget(IPC_PRIVATE, sizeof(barrier_t), IPC_CREAT | 0666);
+
     if (shared_memory_id < OK)
     {
         perror("Error creating shared memory");
@@ -58,6 +108,7 @@ int main(int argc, char *argv[])
     {
         perror("Error creating shared memory");
         exit(1);
+        
     }
 
     /* attaching the shared memory to the parent process */
@@ -79,73 +130,25 @@ int main(int argc, char *argv[])
         pid_t pid = fork();
         if (pid == 0)
         {
-            /* generate a random seed for the child process */
-            srand(time(NULL) + getpid());
-            int sleep_time = rand() % num_processes;
+            /* ONLY CHILD PROCESS ENTERS HERE */
 
-            sleep(sleep_time);
+            sleep_random_time(num_processes);
 
             /* synchronize processes */
             process_barrier(barr);
 
-            for (int uso = 0; uso < 3; uso++)
-            {
+            fifo_recurse_usage(fifo, 3);
 
-                /* (A) simula executar algo no (prologo) */
-                /* random sleep between: 0, 1, 2, 3*/
-                int sleep_time = rand () % 4;
-                printf("Processo: %d Prologo: %d de %d segundos\n", getpid(), uso, sleep_time);
-                sleep(sleep_time);
-                espera(fifo);
-
-                /* (B) simula usar o recurso com exclusividade */
-                /* random sleep between: 0, 1, 2, 3*/
-                sleep_time = rand() % 4;
-                printf("Processo: %d USO: %d por %d segundos\n", getpid(), uso, sleep_time);
-                sleep(sleep_time);
-
-                liberaPrimeiro(fifo);
-
-                /* (C) simula executar algo (epilogo)  */
-                /* random sleep between: 0, 1, 2, 3*/
-                sleep_time = rand() % 4;
-                printf("Processo: %d Epilogo: %d de %d segundos\n", getpid(), uso, sleep_time);
-                sleep(sleep_time);
-            }
-            printf("Processo %d terminando\n", getpid());
             exit(0);
         }
     }
 
-    /* father process */
+    /* ONLY PARENT PROCESS ENTERS HERE */
     process_barrier(barr);
-    srand(time(NULL));
 
-    for (int uso = 0; uso < 3; uso++)
-    {
+    sleep_random_time(num_processes);
 
-        /* (A) simula executar algo no (prologo) */
-        /* random sleep between: 0, 1, 2, 3*/
-        int sleep_time = rand() % 4;
-        printf("Processo: %d Prologo: %d de %d segundos\n", getpid(), uso, sleep_time);
-        sleep(sleep_time);
-        espera(fifo);
-
-        /* (B) simula usar o recurso com exclusividade */
-        /* random sleep between: 0, 1, 2, 3*/
-        sleep_time = rand() % 4;
-        printf("Processo: %d USO: %d por %d segundos\n", getpid(), uso, sleep_time);
-        sleep(sleep_time);
-
-        liberaPrimeiro(fifo);
-
-        /* (C) simula executar algo (epilogo)  */
-        /* random sleep between: 0, 1, 2, 3*/
-        sleep_time = rand() % 4;
-        printf("Processo: %d Epilogo: %d de %d segundos\n", getpid(), uso, sleep_time);
-        sleep(sleep_time);
-    }
-    
+    fifo_recurse_usage(fifo, 3);
     
     /* waiting for the children */
     for (int i = 0; i < num_processes; i++)

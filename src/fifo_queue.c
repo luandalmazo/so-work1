@@ -1,14 +1,15 @@
 /* Created by: Luan Matheus Trindade Dalmazo [lmtd21] and Mateus de Oliveira Silva [mos20] */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include "../include/fifo_queue.h"
 
 int is_empty(FifoQT *F); 
-void lock_queue(FifoQT *F);
-void unlock_queue(FifoQT *F);
+void lock_queue_struct(FifoQT *F);
+void unlock_queue_struct(FifoQT *F);
 void remove_first_from_queue(FifoQT *F); 
 void wait_in_queue(FifoQT *F); 
 
@@ -35,15 +36,16 @@ void init_fifoQ(FifoQT *F) {
  * @param F A pointer to the FIFO queue structure.
  */
 void espera(FifoQT *F) {
-    lock_queue(F);
+    lock_queue_struct(F);
 
     if(is_empty(F)) {
-        unlock_queue(F);
+        unlock_queue_struct(F);
+        F->waiting_count++;
         return;
     }
 
     F->waiting_count++;
-    unlock_queue(F);
+    unlock_queue_struct(F);
     wait_in_queue(F);
 }
 
@@ -57,11 +59,11 @@ void espera(FifoQT *F) {
  *          will be freed.
  */
 void liberaPrimeiro(FifoQT *F) {
-    lock_queue(F);
+    lock_queue_struct(F);
     if (!is_empty(F)) {            
         remove_first_from_queue(F);
     }
-    unlock_queue(F);                 
+    unlock_queue_struct(F);                 
 }
 
 
@@ -71,11 +73,11 @@ int is_empty(FifoQT *F) {
     return F->waiting_count == 0;
 }
 
-void lock_queue(FifoQT *F) {
+void lock_queue_struct(FifoQT *F) {
     sem_wait(&F->mutex);
 }
 
-void unlock_queue(FifoQT *F) {
+void unlock_queue_struct(FifoQT *F) {
     sem_post(&F->mutex);
 }
 
