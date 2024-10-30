@@ -29,14 +29,14 @@ void fifo_recurse_usage(FifoQT *fifo, int uso) {
 
         /* (A) simula executar algo no (prologo) */
         /* random sleep between: 0, 1, 2, 3*/
-        int sleep_time = rand () % 10;
+        int sleep_time = rand () % 4;
         fprintf(stdout, "Processo: %d Prologo: %d de %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
         sleep(sleep_time);
         espera(fifo);
 
         /* (B) simula usar o recurso com exclusividade */
         /* random sleep between: 0, 1, 2, 3*/
-        sleep_time = 3;
+        sleep_time = rand() % 4;
         fprintf(stdout, "Processo: %d USO: %d por %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
         sleep(sleep_time);
 

@@ -39,8 +39,8 @@ void espera(FifoQT *F) {
     lock_queue_struct(F);
 
     if(is_empty(F)) {
-        unlock_queue_struct(F);
         F->waiting_count++;
+        unlock_queue_struct(F);
         return;
     }
 
