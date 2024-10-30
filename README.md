@@ -11,20 +11,34 @@ This program demonstrates process synchronization using two mechanisms: a barrie
 
 ## Code Structure
 
-### Functions
+This program creates a specified number of child processes to synchronize with a barrier and share access to a FIFO queue using shared memory. Here's a breakdown:
 
-- `test_barrier(int num_processes)`: 
-  - Creates a barrier in shared memory.
-  - Initializes the barrier and creates child processes that synchronize at the barrier.
-  
-- `test_fifo(int num_processes)`: 
-  - Creates a FIFO queue in shared memory.
-  - Initializes the FIFO queue and creates child processes that enqueue and dequeue themselves in the FIFO queue.
+1. **Argument Handling**: Validates that exactly one argument (number of processes) is provided. Exits if it's missing or invalid.
 
-### Main Function
+2. **Shared Memory Setup**:
+   - Creates shared memory for a barrier and a FIFO queue.
+   - Attaches this memory to the parent process.
 
-- The `main` function takes a command-line argument to specify the number of child processes to create.
-- It validates the input and calls `test_barrier` followed by `test_fifo`.
+3. **Barrier and FIFO Initialization**:
+   - Initializes a barrier with `num_processes + 1` to synchronize the child processes with the parent.
+   - Initializes a FIFO queue structure.
+
+4. **Child Process Creation**:
+   - Creates `num_processes` child processes using a loop.
+   - Each child sleeps for a random time, waits at the barrier with `process_barrier`, and then accesses the FIFO queue.
+
+5. **Parent Synchronization and FIFO Access**:
+   - The parent process waits at the barrier for all children, sleeps randomly, and then accesses the FIFO queue.
+
+6. **Cleanup**:
+   - The parent waits for all child processes to finish.
+   - Destroys semaphores in the barrier and FIFO.
+   - Detaches and deletes the shared memory.
+
+7. **Exit**:
+   - Returns `0` to signal successful completion.
+
+This setup synchronizes processes using the barrier and coordinates shared access to the FIFO queue.
 
 ## Usage
 
