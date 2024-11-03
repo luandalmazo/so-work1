@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
     {
 
         pid_t pid = fork();
+
         nProc = i + 1;
 
         if (pid == 0)
@@ -142,7 +143,8 @@ int main(int argc, char *argv[])
             sleep_random_time(num_processes, nProc);
 
             /* synchronize processes */
-            process_barrier(barr, nProc);
+            process_barrier(barr);
+            printf("Processo de numero logico %d está saindo da barreira\n", nProc);
 
             fifo_recurse_usage(fifo, 3, num_processes, nProc);
 
@@ -152,7 +154,8 @@ int main(int argc, char *argv[])
 
     nProc = 0;
     /* ONLY PARENT PROCESS ENTERS HERE */
-    process_barrier(barr, nProc);
+    process_barrier(barr);
+    printf("Processo de numero logico %d está saindo da barreira\n", nProc);
     sleep_random_time(num_processes, nProc); 
 
     fifo_recurse_usage(fifo, 3, num_processes, nProc);
