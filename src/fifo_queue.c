@@ -1,5 +1,3 @@
-/* Created by: Luan Matheus Trindade Dalmazo [lmtd21] and Mateus de Oliveira Silva [mos20] */
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -7,85 +5,83 @@
 #include <pthread.h>
 #include "../include/fifo_queue.h"
 
-int is_empty(FifoQT *F); 
+
+void init_fifoQ(FifoQT *F);
+void espera(FifoQT *F);
+void liberaPrimeiro(FifoQT *F);
+int is_empty(FifoQT *F);
 void lock_queue_struct(FifoQT *F);
 void unlock_queue_struct(FifoQT *F);
-void remove_first_from_queue(FifoQT *F); 
-void wait_in_queue(FifoQT *F); 
+void enqueue(FifoQT *F);
+sem_t* dequeue(FifoQT *F);
+sem_t* get_first(FifoQT *F);
 
-/**
- * @brief Initializes the FIFO queue.
- *
- * This function sets up the FIFO queue structure pointed to by `F`.
- *
- * @param F Pointer to the FIFO queue structure to be initialized.
- */
+// Initialize the FIFO queue
 void init_fifoQ(FifoQT *F) {
-    sem_init(&F->mutex, 1, 1); // Semaphore with process sharing
-    sem_init(&F->wait_sem, 1, 0);
+    sem_init(&F->mutex, 1, 1);
+    F->front = 0;
+    F->rear = 0;
     F->waiting_count = 0;
+
+    // Initialize all semaphores in the array
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        sem_init(&F->wait_sems[i], 1, 0); // Initialize to 0
+    }
 }
 
-/**
- * @brief Waits for an element in the FIFO queue.
- *
- * This function blocks the calling thread until an element is available
- * in the FIFO queue. It is typically used in a producer-consumer scenario
- * where the consumer needs to wait for the producer to add elements to the queue.
- *
- * @param F A pointer to the FIFO queue structure.
- */
+// Waits for an element in the FIFO queue
 void espera(FifoQT *F) {
     lock_queue_struct(F);
-
-    if(is_empty(F)) {
-        F->waiting_count++;
-        unlock_queue_struct(F);
-        return;
-    }
-
+    
+    enqueue(F); // Enqueue this thread's position
     F->waiting_count++;
+    
     unlock_queue_struct(F);
-    wait_in_queue(F);
+
+    // Wait on this thread's specific semaphore
+    if (F->waiting_count > 1)
+    {
+        sem_wait(&F->wait_sems[F->rear - 1]); // Wait on the semaphore corresponding to this thread
+    }
 }
 
-/**
- * @brief Frees the first element in the FIFO queue.
- *
- * This function removes and frees the memory of the first element in the 
- * FIFO queue pointed to by the given FifoQT pointer.
- *
- * @param F Pointer to the FIFO queue (FifoQT) from which the first element 
- *          will be freed.
- */
+// Frees the first element in the FIFO queue
 void liberaPrimeiro(FifoQT *F) {
     lock_queue_struct(F);
-    if (!is_empty(F)) {            
-        remove_first_from_queue(F);
+
+    dequeue(F); // Remove the semaphore from the queue
+    if (!is_empty(F)) {
+        sem_post(&F->wait_sems[F->front]); // Signal the semaphore for the first thread in line
     }
-    unlock_queue_struct(F);                 
+
+    unlock_queue_struct(F);
 }
 
-
-/* Helper functions for the FIFO queue */ 
-
+// Check if the queue is empty
 int is_empty(FifoQT *F) {
     return F->waiting_count == 0;
 }
 
+// Lock the queue structure
 void lock_queue_struct(FifoQT *F) {
     sem_wait(&F->mutex);
 }
 
+// Unlock the queue structure
 void unlock_queue_struct(FifoQT *F) {
     sem_post(&F->mutex);
 }
 
-void remove_first_from_queue(FifoQT *F) {
-    F->waiting_count--;
-    sem_post(&F->wait_sem);
+// Enqueue a semaphore into the FIFO queue
+void enqueue(FifoQT *F) {
+    F->rear = (F->rear + 1) % MAX_QUEUE_SIZE; // Update rear index
 }
 
-void wait_in_queue(FifoQT *F) {
-    sem_wait(&F->wait_sem);
+// Dequeue a semaphore from the FIFO queue
+sem_t* dequeue(FifoQT *F) {
+    sem_t *sem = &F->wait_sems[F->front]; // Get the semaphore at the front
+    F->front = (F->front + 1) % MAX_QUEUE_SIZE; // Update front index
+    F->waiting_count--; // Decrease the waiting count
+    return sem;
 }
+

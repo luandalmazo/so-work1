@@ -165,8 +165,8 @@ int main(int argc, char *argv[])
     sem_destroy(&barr->mutex);
     sem_destroy(&barr->barrier_semaphore);
     /* destroying semephafore for FIFO*/
-    sem_destroy(&fifo->mutex);
-    sem_destroy(&fifo->wait_sem);
+    //sem_destroy(&fifo->mutex);
+    //sem_destroy(&fifo->wait_sem);
 
     /* detaching shared memory */
     shmdt(barr);
