@@ -17,6 +17,6 @@ typedef struct barrier_s {
 void init_barrier(barrier_t *barr, int n);
 
 /* Synchronizes processes */
-void process_barrier(barrier_t *barr);
+void process_barrier(barrier_t *barr, int nProc);
 
 #endif

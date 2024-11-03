@@ -51,11 +51,11 @@ void fifo_recurse_usage(FifoQT *fifo, int uso) {
     printf("Processo %d terminando\n", getpid());
 }
 
-void sleep_random_time(int num_processes)
+void sleep_random_time(int num_processes, int nProc)
 {
     srand(time(NULL) + getpid());
     int sleep_time = rand() % num_processes;
-    printf("Processo: %d iniciando com sleep de %d segundos: %s\n", getpid(), sleep_time, get_current_time());
+    printf("Processo: %d [Numero logico: %d] iniciando com sleep de %d segundos: %s\n", getpid(), nProc, sleep_time, get_current_time());
     sleep(sleep_time);
 }
 
@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
     int shared_memory_id;
     barrier_t *barr;
     FifoQT *fifo;
+    int nProc;
 
     /* creating the shared memory for the barrier */
     shared_memory_id = shmget(IPC_PRIVATE, sizeof(barrier_t), IPC_CREAT | 0666);
@@ -128,14 +129,16 @@ int main(int argc, char *argv[])
     {
 
         pid_t pid = fork();
+        nProc = i + 1;
         if (pid == 0)
-        {
+        {   
             /* ONLY CHILD PROCESS ENTERS HERE */
+            printf("Processo criado. PID: %d, PID-PAI: %d, Número lógico %d\n", getpid(), getppid(), nProc);
 
-            sleep_random_time(num_processes);
+            sleep_random_time(num_processes, nProc);
 
             /* synchronize processes */
-            process_barrier(barr);
+            process_barrier(barr, nProc);
 
             fifo_recurse_usage(fifo, 3);
 
@@ -144,9 +147,9 @@ int main(int argc, char *argv[])
     }
 
     /* ONLY PARENT PROCESS ENTERS HERE */
-    process_barrier(barr);
-
-    sleep_random_time(num_processes);
+    nProc = 0;
+    process_barrier(barr, nProc);
+    sleep_random_time(num_processes, nProc);
 
     fifo_recurse_usage(fifo, 3);
     
@@ -157,6 +160,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Processo %d [pai] terminando\n", getpid());
+
     /* destroying semaphore for barrier */
     sem_destroy(&barr->mutex);
     sem_destroy(&barr->barrier_semaphore);
