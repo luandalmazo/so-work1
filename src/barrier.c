@@ -43,13 +43,12 @@ void init_barrier(barrier_t *barr, int n){
  * @brief Process the barrier synchronization.
  *
  * This function is responsible for processing the barrier synchronization. 
- * It takes a pointer to a barrier_t structure and the logical process number as input parameters.
+ * It takes a pointer to a barrier_t structure input parameter.
  *
  * 
  * @param barr Pointer to the barrier_t structure.
- * @param nProc Logical process number.
  */
-void process_barrier(barrier_t *barr, int nProc){
+void process_barrier(barrier_t *barr){
 
     /* locking the mutex */
     sem_wait(&barr->mutex);
@@ -69,6 +68,4 @@ void process_barrier(barrier_t *barr, int nProc){
 
     /* waiting for all processes to arrive */
     sem_wait(&barr->barrier_semaphore);
-
-    printf("Processo de numero logico %d está saindo da barreira\n", nProc);
 }

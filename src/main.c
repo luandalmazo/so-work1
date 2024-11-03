@@ -10,6 +10,7 @@
 #include "../include/barrier.h"
 #include "../include/fifo_queue.h"
 
+
 char* get_current_time() {
     // Static buffer to hold the formatted time string
     static char time_str[9];
@@ -23,21 +24,23 @@ char* get_current_time() {
     return time_str;
 }
 
-void fifo_recurse_usage(FifoQT *fifo, int uso) {
+
+void fifo_recurse_usage(FifoQT *fifo, int uso, int num_processes, int Pi) {
     for (int uso = 0; uso < 3; uso++)
     {
 
         /* (A) simula executar algo no (prologo) */
         /* random sleep between: 0, 1, 2, 3*/
+
         int sleep_time = rand () % 4;
-        fprintf(stdout, "Processo: %d Prologo: %d de %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
+        fprintf(stdout, "Processo: %d Prologo: %d de %d segundos: %s \n", Pi , uso, sleep_time, get_current_time());
         sleep(sleep_time);
         espera(fifo);
 
         /* (B) simula usar o recurso com exclusividade */
         /* random sleep between: 0, 1, 2, 3*/
         sleep_time = rand() % 4;
-        fprintf(stdout, "Processo: %d USO: %d por %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
+        fprintf(stdout, "Processo: %d USO: %d por %d segundos: %s \n", Pi, uso, sleep_time, get_current_time());
         sleep(sleep_time);
 
         liberaPrimeiro(fifo);
@@ -45,7 +48,7 @@ void fifo_recurse_usage(FifoQT *fifo, int uso) {
         /* (C) simula executar algo (epilogo)  */
         /* random sleep between: 0, 1, 2, 3*/
         sleep_time = rand() % 4;
-        fprintf(stdout, "Processo: %d Epilogo: %d de %d segundos: %s \n", getpid(), uso, sleep_time, get_current_time());
+        fprintf(stdout, "Processo: %d Epilogo: %d de %d segundos: %s \n", Pi, uso, sleep_time, get_current_time());
         sleep(sleep_time);
     }
     printf("Processo %d terminando\n", getpid());
@@ -70,7 +73,7 @@ int main(int argc, char *argv[])
     }
 
     int num_processes = atoi(argv[1]);
-
+    
     if (num_processes < 1)
     {
         printf("Número de processos inválido: %d\n", num_processes);
@@ -129,7 +132,9 @@ int main(int argc, char *argv[])
     {
 
         pid_t pid = fork();
+
         nProc = i + 1;
+
         if (pid == 0)
         {   
             /* ONLY CHILD PROCESS ENTERS HERE */
@@ -138,20 +143,22 @@ int main(int argc, char *argv[])
             sleep_random_time(num_processes, nProc);
 
             /* synchronize processes */
-            process_barrier(barr, nProc);
+            process_barrier(barr);
+            printf("Processo de numero logico %d está saindo da barreira\n", nProc);
 
-            fifo_recurse_usage(fifo, 3);
+            fifo_recurse_usage(fifo, 3, num_processes, nProc);
 
             exit(0);
         }
     }
 
-    /* ONLY PARENT PROCESS ENTERS HERE */
     nProc = 0;
-    process_barrier(barr, nProc);
-    sleep_random_time(num_processes, nProc);
+    /* ONLY PARENT PROCESS ENTERS HERE */
+    process_barrier(barr);
+    printf("Processo de numero logico %d está saindo da barreira\n", nProc);
+    sleep_random_time(num_processes, nProc); 
 
-    fifo_recurse_usage(fifo, 3);
+    fifo_recurse_usage(fifo, 3, num_processes, nProc);
     
     /* waiting for the children */
     for (int i = 0; i < num_processes; i++)
